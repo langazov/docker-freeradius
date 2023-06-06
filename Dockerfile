@@ -1,8 +1,8 @@
 FROM alpine:3.18
 
-MAINTAINER 2stacks <2stacks@2stacks.net>
+MAINTAINER Emil Langazov <langazov@gmail.com>
 
-# Use docker build --pull -t 2stacks/freeradius .
+# Use docker build --pull -t langazov/freeradius .
 
 # Image details
 LABEL net.2stacks.name="2stacks" \
