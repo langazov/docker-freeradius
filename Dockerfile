@@ -11,7 +11,7 @@ LABEL net.2stacks.name="2stacks" \
       net.2stacks.url="http://www.2stacks.net" \
       net.2stacks.vcs-type="Git" \
       net.2stacks.version="1.5.1" \
-      net.2stacks.radius.version="3.0.20-r1"
+      net.2stacks.radius.version="v3.0.26-r2"
 
 RUN apk --update add freeradius freeradius-mysql freeradius-eap openssl
 
