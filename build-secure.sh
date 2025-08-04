@@ -18,6 +18,30 @@ echo "Git Commit: ${GIT_COMMIT}"
 echo "Git URL: ${GIT_URL}"
 echo ""
 
+# Check if user wants to push
+PUSH_IMAGE="${PUSH_IMAGE:-true}"
+if [[ "$PUSH_IMAGE" == "false" ]]; then
+    echo "Building locally (no push)..."
+    PUSH_FLAG="--load"
+else
+    echo "Building and pushing to registry..."
+    PUSH_FLAG="--push"
+    
+    # Check if user is logged in to Docker Hub
+    if ! docker buildx ls >/dev/null 2>&1; then
+        echo "⚠️  Docker Buildx not available. Using regular docker build..."
+        docker build \
+            --tag "${IMAGE_NAME}:${TAG}" \
+            --tag "${IMAGE_NAME}:${GIT_COMMIT}" \
+            --label "org.opencontainers.image.created=${BUILD_DATE}" \
+            --label "org.opencontainers.image.revision=${GIT_COMMIT}" \
+            --label "org.opencontainers.image.url=${GIT_URL}" \
+            .
+        echo "⚠️  Note: SBOM and provenance require Docker Buildx. Image built without attestations."
+        exit 0
+    fi
+fi
+
 # Build with SBOM and Provenance
 # Note: Requires Docker Buildx and BuildKit
 docker buildx build \
@@ -29,7 +53,7 @@ docker buildx build \
     --label "org.opencontainers.image.url=${GIT_URL}" \
     --sbom=true \
     --provenance=true \
-    --push \
+    ${PUSH_FLAG} \
     .
 
 echo ""
@@ -40,6 +64,18 @@ echo "  ✓ Provenance attestation"
 echo "  ✓ Multi-architecture support (amd64, arm64)"
 echo "  ✓ Security labels and metadata"
 echo ""
-echo "To inspect the SBOM and provenance:"
-echo "  docker buildx imagetools inspect ${IMAGE_NAME}:${TAG} --format '{{ json .Provenance }}'"
-echo "  docker buildx imagetools inspect ${IMAGE_NAME}:${TAG} --format '{{ json .SBOM }}'"
+
+if [[ "$PUSH_IMAGE" == "false" ]]; then
+    echo "Image available locally as: ${IMAGE_NAME}:${TAG}"
+    echo ""
+    echo "To push later, run:"
+    echo "  docker push ${IMAGE_NAME}:${TAG}"
+else
+    echo "To inspect the SBOM and provenance:"
+    echo "  docker buildx imagetools inspect ${IMAGE_NAME}:${TAG} --format '{{ json .Provenance }}'"  
+    echo "  docker buildx imagetools inspect ${IMAGE_NAME}:${TAG} --format '{{ json .SBOM }}'"
+fi
+
+echo ""
+echo "To build locally without pushing:"
+echo "  PUSH_IMAGE=false ./build-secure.sh"

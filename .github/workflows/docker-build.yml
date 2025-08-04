@@ -30,7 +30,7 @@ jobs:
       uses: docker/setup-buildx-action@v3
 
     - name: Log into Docker Hub
-      if: github.event_name != 'pull_request'
+      if: github.event_name != 'pull_request' && github.repository_owner == 'langazov' && secrets.DOCKER_USERNAME != '' && secrets.DOCKER_PASSWORD != ''
       uses: docker/login-action@v3
       with:
         registry: ${{ env.REGISTRY }}
@@ -56,7 +56,7 @@ jobs:
       with:
         context: .
         platforms: linux/amd64,linux/arm64
-        push: ${{ github.event_name != 'pull_request' }}
+        push: ${{ github.event_name != 'pull_request' && github.repository_owner == 'langazov' && secrets.DOCKER_USERNAME != '' && secrets.DOCKER_PASSWORD != '' }}
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
         # Enable SBOM and Provenance
@@ -66,7 +66,7 @@ jobs:
         cache-to: type=gha,mode=max
 
     - name: Generate artifact attestation
-      if: github.event_name != 'pull_request'
+      if: github.event_name != 'pull_request' && github.repository_owner == 'langazov' && secrets.DOCKER_USERNAME != '' && secrets.DOCKER_PASSWORD != ''
       uses: actions/attest-build-provenance@v1
       with:
         subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
@@ -76,11 +76,22 @@ jobs:
     - name: Verify attestations
       if: github.event_name != 'pull_request'
       run: |
-        echo "Image built with attestations:"
-        echo "- SBOM: ✓"
-        echo "- Provenance: ✓"
-        echo "- Build attestation: ✓"
-        echo ""
-        echo "To verify locally:"
-        echo "docker buildx imagetools inspect ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest --format '{{ json .Provenance }}'"
-        echo "docker buildx imagetools inspect ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest --format '{{ json .SBOM }}'"
+        if [[ "${{ secrets.DOCKER_USERNAME }}" != "" && "${{ secrets.DOCKER_PASSWORD }}" != "" && "${{ github.repository_owner }}" == "langazov" ]]; then
+          echo "Image built and pushed with attestations:"
+          echo "- SBOM: ✓"
+          echo "- Provenance: ✓"
+          echo "- Build attestation: ✓"
+          echo ""
+          echo "To verify locally:"
+          echo "docker buildx imagetools inspect ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest --format '{{ json .Provenance }}'"
+          echo "docker buildx imagetools inspect ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest --format '{{ json .SBOM }}'"
+        else
+          echo "Image built locally with attestations:"
+          echo "- SBOM: ✓"
+          echo "- Provenance: ✓"
+          echo "- Build attestation: ⚠️  (Skipped - Docker Hub credentials not configured)"
+          echo ""
+          echo "Note: To push images with attestations, configure DOCKER_USERNAME and DOCKER_PASSWORD secrets in your repository settings."
+          echo ""
+          echo "Local build completed successfully with SBOM and provenance generated."
+        fi
