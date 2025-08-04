@@ -74,6 +74,19 @@ else
     echo "To inspect the SBOM and provenance:"
     echo "  docker buildx imagetools inspect ${IMAGE_NAME}:${TAG} --format '{{ json .Provenance }}'"  
     echo "  docker buildx imagetools inspect ${IMAGE_NAME}:${TAG} --format '{{ json .SBOM }}'"
+    
+    # Ask if user wants to sync README to Docker Hub
+    echo ""
+    read -p "📄 Sync README to Docker Hub? (y/N): " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        if [[ -f "./sync-readme-dockerhub.sh" ]]; then
+            echo "🐳 Syncing README to Docker Hub..."
+            ./sync-readme-dockerhub.sh
+        else
+            echo "⚠️  sync-readme-dockerhub.sh not found. Please run it manually or use GitHub Actions."
+        fi
+    fi
 fi
 
 echo ""

@@ -1,0 +1,23 @@
+name: Sync README to Docker Hub
+
+on:
+  push:
+    branches: [ master, main ]
+    paths: [ 'README.md' ]
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  sync-readme:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Sync README to Docker Hub
+        uses: ms-jpq/sync-dockerhub-readme@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: langazov/freeradius
+          readme: "./README.md"
