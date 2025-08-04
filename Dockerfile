@@ -14,8 +14,7 @@ LABEL net.2stacks.name="2stacks" \
       net.2stacks.radius.version="v3.0.26-r2"
 
 RUN apk --update add freeradius freeradius-mysql freeradius-eap openssl && \
-    addgroup -g 1001 radius && \
-    adduser -D -u 1001 -G radius -s /bin/sh radius
+    adduser -D -u 1001 -G radius -s /bin/sh radiususer
 
 EXPOSE 1812/udp 1813/udp
 
@@ -28,20 +27,20 @@ ENV RADIUS_KEY=testing123
 ENV RAD_CLIENTS=10.0.0.0/24
 ENV RAD_DEBUG=no
 
-ADD --chown=radius:radius ./etc/raddb/ /etc/raddb
+ADD --chown=radiususer:radius ./etc/raddb/ /etc/raddb
 RUN /etc/raddb/certs/bootstrap && \
-    chown -R radius:radius /etc/raddb/certs && \
+    chown -R radiususer:radius /etc/raddb/certs && \
     chmod 640 /etc/raddb/certs/*.pem && \
-    chown -R radius:radius /etc/raddb && \
+    chown -R radiususer:radius /etc/raddb && \
     mkdir -p /var/log/radius /var/run/radiusd && \
-    chown -R radius:radius /var/log/radius /var/run/radiusd
+    chown -R radiususer:radius /var/log/radius /var/run/radiusd
 
 
-ADD --chown=radius:radius ./scripts/start.sh /start.sh
-ADD --chown=radius:radius ./scripts/wait-for.sh /wait-for.sh
+ADD --chown=radiususer:radius ./scripts/start.sh /start.sh
+ADD --chown=radiususer:radius ./scripts/wait-for.sh /wait-for.sh
 
 RUN chmod +x /start.sh /wait-for.sh
 
-USER radius
+USER radiususer
 
 CMD ["/start.sh"]
