@@ -6,7 +6,6 @@
 set -e
 
 IMAGE_NAME="langazov/freeradius"
-TAG="${1:-latest}"
 BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
 SHORT_SHA=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
 GIT_URL=$(git config --get remote.origin.url 2>/dev/null || echo "unknown")
@@ -31,7 +30,6 @@ else
     if ! docker buildx ls >/dev/null 2>&1; then
         echo "⚠️  Docker Buildx not available. Using regular docker build..."
         docker build \
-            # --tag "${IMAGE_NAME}:${SHORT_SHA}" \
             --tag "${IMAGE_NAME}:${SHORT_SHA}" \
             --label "org.opencontainers.image.created=${BUILD_DATE}" \
             --label "org.opencontainers.image.revision=${SHORT_SHA}" \
@@ -46,7 +44,6 @@ fi
 # Note: Requires Docker Buildx and BuildKit
 docker buildx build \
     --platform linux/amd64,linux/arm64 \
-    # --tag "${IMAGE_NAME}:${SHORT_SHA}" \
     --tag "${IMAGE_NAME}:${SHORT_SHA}" \
     --label "org.opencontainers.image.created=${BUILD_DATE}" \
     --label "org.opencontainers.image.revision=${SHORT_SHA}" \
