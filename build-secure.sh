@@ -12,7 +12,7 @@ SHORT_SHA=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
 GIT_URL=$(git config --get remote.origin.url 2>/dev/null || echo "unknown")
 
 echo "Building FreeRADIUS Docker image with security attestations..."
-echo "Image: ${IMAGE_NAME}:${TAG}"
+echo "Image: ${IMAGE_NAME}:${SHORT_SHA}"
 echo "Build Date: ${BUILD_DATE}"
 echo "Git SHA: ${SHORT_SHA}"
 echo "Git URL: ${GIT_URL}"
@@ -31,7 +31,7 @@ else
     if ! docker buildx ls >/dev/null 2>&1; then
         echo "⚠️  Docker Buildx not available. Using regular docker build..."
         docker build \
-            --tag "${IMAGE_NAME}:${TAG}" \
+            # --tag "${IMAGE_NAME}:${SHORT_SHA}" \
             --tag "${IMAGE_NAME}:${SHORT_SHA}" \
             --label "org.opencontainers.image.created=${BUILD_DATE}" \
             --label "org.opencontainers.image.revision=${SHORT_SHA}" \
@@ -46,7 +46,7 @@ fi
 # Note: Requires Docker Buildx and BuildKit
 docker buildx build \
     --platform linux/amd64,linux/arm64 \
-    --tag "${IMAGE_NAME}:${TAG}" \
+    # --tag "${IMAGE_NAME}:${SHORT_SHA}" \
     --tag "${IMAGE_NAME}:${SHORT_SHA}" \
     --label "org.opencontainers.image.created=${BUILD_DATE}" \
     --label "org.opencontainers.image.revision=${SHORT_SHA}" \
@@ -66,14 +66,14 @@ echo "  ✓ Security labels and metadata"
 echo ""
 
 if [[ "$PUSH_IMAGE" == "false" ]]; then
-    echo "Image available locally as: ${IMAGE_NAME}:${TAG}"
+    echo "Image available locally as: ${IMAGE_NAME}:${SHORT_SHA}"
     echo ""
     echo "To push later, run:"
-    echo "  docker push ${IMAGE_NAME}:${TAG}"
+    echo "  docker push ${IMAGE_NAME}:${SHORT_SHA}"
 else
     echo "To inspect the SBOM and provenance:"
-    echo "  docker buildx imagetools inspect ${IMAGE_NAME}:${TAG} --format '{{ json .Provenance }}'"  
-    echo "  docker buildx imagetools inspect ${IMAGE_NAME}:${TAG} --format '{{ json .SBOM }}'"
+    echo "  docker buildx imagetools inspect ${IMAGE_NAME}:${SHORT_SHA} --format '{{ json .Provenance }}'"  
+    echo "  docker buildx imagetools inspect ${IMAGE_NAME}:${SHORT_SHA} --format '{{ json .SBOM }}'"
     
     # Ask if user wants to sync README to Docker Hub
     echo ""
