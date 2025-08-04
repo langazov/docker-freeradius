@@ -23,7 +23,7 @@ If you want to automatically push images to Docker Hub via GitHub Actions:
    - **Value**: Your Docker Hub username (`langazov`)
 4. Click **New repository secret** and add:
    - **Name**: `DOCKER_PASSWORD` 
-   - **Value**: The access token you created in step 1
+   - **Value**: The access token you created in step 1 (NOT your Docker Hub password)
 
 ### 3. Test the Setup
 1. Push a commit to the `master` branch
@@ -67,3 +67,23 @@ The workflow is designed to be secure:
 - Includes proper attestation generation
 
 Your security setup is complete whether you choose to push to Docker Hub or not! 🔒
+
+## Troubleshooting
+
+### "Username and password required" Error
+This means the GitHub secrets are not configured. The workflow will still build successfully but won't push to Docker Hub.
+
+**Solution**: Follow the setup steps above, or the workflow will continue to work in "build-only" mode.
+
+### "Login succeeded but push failed" 
+Check that your Docker Hub access token has **Write** permissions.
+
+### Workflow runs but doesn't push
+Verify:
+1. You're pushing to the `master` branch (not a PR)
+2. The repository owner is `langazov`
+3. Both `DOCKER_USERNAME` and `DOCKER_PASSWORD` secrets are set
+4. The secrets contain the correct values
+
+### View Build Logs  
+Go to your repository → **Actions** tab → Click on the latest workflow run to see detailed logs.
