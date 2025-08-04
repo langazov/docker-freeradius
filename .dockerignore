@@ -1,8 +1,54 @@
-.dockerignore
+# Docker ignore file for SBOM optimization
+# Exclude development and build artifacts that shouldn't be in SBOM
+
+# Version control
 .git*
-.idea
+.gitignore
+.gitattributes
+
+# Documentation that doesn't affect runtime
+README.md
+docs/
+*.md
+LICENSE
+
+# CI/CD files
+.github/
+.gitlab-ci.yml
 .travis.yml
-docs/_config.yml
-docker-compose.yml
-configs
+Jenkinsfile
+
+# Development files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Build artifacts
+build/
+dist/
+target/
+node_modules/
+*.log
+
+# Docker files and configs
+.dockerignore
+docker-compose*.yml
+configs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Security and testing files
+test/
+tests/
+*.test
+*.spec
+.env.example
+.env.local
+
+# Build scripts and dumps
+build-secure.sh
 /dump/

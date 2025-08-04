@@ -8,13 +8,13 @@ set -e
 IMAGE_NAME="langazov/freeradius"
 TAG="${1:-latest}"
 BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
-GIT_COMMIT=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+SHORT_SHA=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
 GIT_URL=$(git config --get remote.origin.url 2>/dev/null || echo "unknown")
 
 echo "Building FreeRADIUS Docker image with security attestations..."
 echo "Image: ${IMAGE_NAME}:${TAG}"
 echo "Build Date: ${BUILD_DATE}"
-echo "Git Commit: ${GIT_COMMIT}"
+echo "Git SHA: ${SHORT_SHA}"
 echo "Git URL: ${GIT_URL}"
 echo ""
 
@@ -32,9 +32,9 @@ else
         echo "⚠️  Docker Buildx not available. Using regular docker build..."
         docker build \
             --tag "${IMAGE_NAME}:${TAG}" \
-            --tag "${IMAGE_NAME}:${GIT_COMMIT}" \
+            --tag "${IMAGE_NAME}:${SHORT_SHA}" \
             --label "org.opencontainers.image.created=${BUILD_DATE}" \
-            --label "org.opencontainers.image.revision=${GIT_COMMIT}" \
+            --label "org.opencontainers.image.revision=${SHORT_SHA}" \
             --label "org.opencontainers.image.url=${GIT_URL}" \
             .
         echo "⚠️  Note: SBOM and provenance require Docker Buildx. Image built without attestations."
@@ -47,9 +47,9 @@ fi
 docker buildx build \
     --platform linux/amd64,linux/arm64 \
     --tag "${IMAGE_NAME}:${TAG}" \
-    --tag "${IMAGE_NAME}:${GIT_COMMIT}" \
+    --tag "${IMAGE_NAME}:${SHORT_SHA}" \
     --label "org.opencontainers.image.created=${BUILD_DATE}" \
-    --label "org.opencontainers.image.revision=${GIT_COMMIT}" \
+    --label "org.opencontainers.image.revision=${SHORT_SHA}" \
     --label "org.opencontainers.image.url=${GIT_URL}" \
     --sbom=true \
     --provenance=true \
