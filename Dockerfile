@@ -2,7 +2,7 @@ FROM alpine:3.22.1
 
 MAINTAINER Emil Langazov <langazov@gmail.com>
 
-# Use docker build --pull -t langazov/freeradius .
+# Use docker build --pull -t langazov/freeradius . --sbom=true --provenance=true
 
 # Image details
 LABEL net.2stacks.name="2stacks" \
@@ -11,7 +11,14 @@ LABEL net.2stacks.name="2stacks" \
       net.2stacks.url="http://www.2stacks.net" \
       net.2stacks.vcs-type="Git" \
       net.2stacks.version="1.5.1" \
-      net.2stacks.radius.version="v3.0.26-r2"
+      net.2stacks.radius.version="v3.0.26-r2" \
+      org.opencontainers.image.title="FreeRADIUS Server" \
+      org.opencontainers.image.description="FreeRADIUS server with MySQL support running as non-root user" \
+      org.opencontainers.image.vendor="Emil Langazov" \
+      org.opencontainers.image.licenses="MIT" \
+      org.opencontainers.image.source="https://github.com/langazov/docker-freeradius" \
+      org.opencontainers.image.documentation="https://github.com/langazov/docker-freeradius/blob/master/README.md" \
+      org.opencontainers.image.base.name="docker.io/library/alpine:3.22.1"
 
 RUN apk --update add freeradius freeradius-mysql freeradius-eap openssl && \
     adduser -D -u 1001 -G radius -s /bin/sh radiususer
